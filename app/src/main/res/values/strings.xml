@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">OrderManager</string>
+    <string name="order_title_hint">Enter a title for the order.</string>
+    <string name="order_title_label">Title</string>
+    <string name="order_details_label">Details</string>
+    <string name="order_solved_label">Solved?</string>
+    <string name="date_picker_title">End date of order:</string>
 </resources>

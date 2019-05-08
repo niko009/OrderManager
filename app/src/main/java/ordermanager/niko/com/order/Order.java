@@ -1,5 +1,7 @@
 package ordermanager.niko.com.order;
 
+import android.text.format.DateFormat;
+
 import java.util.Date;
 import java.util.UUID;
 
@@ -20,11 +22,21 @@ public class Order {
         return uuid;
     }
 
-    public Order(){
-        uuid= UUID.randomUUID();
-        Name="Order";
-        StartTime= new Date();
-        Description="";
-        Cost=0;
+    public String getStartTimeString() {
+      return  DateFormat.format("yyyyMMdd  kk:mm", StartTime).toString();
+    }
+    public Order(UUID uuid) {
+        this.uuid = uuid;
+        Name = "Order";
+        StartTime = new Date();
+        Description = "";
+        Cost = 0;
+    }
+    public Order() {
+        uuid = UUID.randomUUID();
+        Name = "Order";
+        StartTime = new Date();
+        Description = "";
+        Cost = 0;
     }
 }
