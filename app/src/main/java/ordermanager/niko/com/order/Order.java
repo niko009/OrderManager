@@ -17,13 +17,12 @@ public class Order {
     public Date NeedEndTime;
     public String Description;
     public int Cost;
-
     public UUID getUuid() {
         return uuid;
     }
 
     public String getStartTimeString() {
-      return  DateFormat.format("yyyyMMdd  kk:mm", StartTime).toString();
+      return  DateFormat.format("yyyy.MM.dd  kk:mm", StartTime).toString();
     }
     public Order(UUID uuid) {
         this.uuid = uuid;

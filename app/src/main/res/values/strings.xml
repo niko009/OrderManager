@@ -5,4 +5,19 @@
     <string name="order_details_label">Details</string>
     <string name="order_solved_label">Solved?</string>
     <string name="date_picker_title">End date of order:</string>
+    <string name="new_order">New Order</string>
+    <string name="remove_order">Remove Order</string>
+    <string name="show_subtitle">Show Subtitle</string>
+    <string name="hide_subtitle">Hide Subtitle</string>
+    <string name="subtitle_format">%1$s orders</string>
+    <string name="str_delete_order_dialog_title">confirm removal</string>
+    <string name="str_delete_order_dialog_yes">yes</string>
+    <string name="str_delete_order_dialog_no">no</string>
+    <string name="save_order">save</string>
+    <string name="order_saved_successful">Order saved</string>
+    <string name="str_order_cost">Cost</string>
+    <plurals name="subtitle_plural">
+        <item quantity="one">%1$s order</item>
+        <item quantity="other">%1$s orders</item>
+    </plurals>
 </resources>

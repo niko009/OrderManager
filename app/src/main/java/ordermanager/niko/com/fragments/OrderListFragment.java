@@ -1,17 +1,29 @@
 package ordermanager.niko.com.fragments;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ordermanager.niko.com.R;
@@ -21,10 +33,66 @@ import ordermanager.niko.com.order.OrderLab;
 
 public class OrderListFragment extends Fragment {
     private static final int REQUEST_ORDER = 1;
+    private static final String SAVED_SUBTITLE_VISIBLE = "subtitle";
 
+    private final int CAMERA_PERMISSION_ID = 1;
     private RecyclerView mOrderRecyclerView;
     private OrderAdapter mAdapter;
+    private boolean mSubtitleVisible;
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            CheckPermissions();
+    }
+  /*  private void requestPermission(String permission, int requestCode) {
+        // запрашиваем разрешение
+        ActivityCompat.requestPermissions(getActivity(), new String[]{permission}, requestCode);
+    }
+
+    private boolean isPermissionGranted(String permission) {
+        int permissionCheck = ActivityCompat.checkSelfPermission(getActivity(), permission);
+        return permissionCheck == PackageManager.PERMISSION_GRANTED;
+    }*/
+
+    private void CheckPermissions() {
+        String[] needAscPermArray;
+        List<String> needAscPerms = new ArrayList<>();
+        String[] perms = retrievePermissions(getActivity());
+        for (String perm : perms) {
+            if (!checkPermission(perm)) {
+               // DataWorks.LogE(TAG, "Need Ask " + perm);
+                needAscPerms.add(perm);
+            }
+        }
+
+        if (needAscPerms.size() > 0) {
+            needAscPermArray = new String[needAscPerms.size()];
+            needAscPerms.toArray(needAscPermArray);
+            ActivityCompat.requestPermissions(getActivity(), needAscPermArray, 1);
+        }
+
+    }
+    private boolean checkPermission(String permission) {
+        int result = ContextCompat.checkSelfPermission(getActivity(), permission);
+        if (result == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    public static String[] retrievePermissions(Context context) {
+        try {
+            return context
+                    .getPackageManager()
+                    .getPackageInfo(context.getPackageName(), PackageManager.GET_PERMISSIONS)
+                    .requestedPermissions;
+        } catch (PackageManager.NameNotFoundException e) {
+            return new String[0];
+        }
+    }
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_order_list, container,
@@ -33,9 +101,18 @@ public class OrderListFragment extends Fragment {
                 .findViewById(R.id.order_recycler_view);
         mOrderRecyclerView.setLayoutManager(new LinearLayoutManager
                 (getActivity()));
+        if (savedInstanceState != null) {
+            mSubtitleVisible = savedInstanceState.getBoolean
+                    (SAVED_SUBTITLE_VISIBLE);
+        }
+        updateUI();
         return view;
     }
-
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(SAVED_SUBTITLE_VISIBLE, mSubtitleVisible);
+    }
     @Override
     public void onResume() {
         super.onResume();
@@ -51,6 +128,7 @@ public class OrderListFragment extends Fragment {
         } else {
             mAdapter.notifyDataSetChanged();
         }
+        updateSubtitle();
     }
 
 
@@ -123,5 +201,47 @@ public class OrderListFragment extends Fragment {
         if (requestCode == REQUEST_ORDER) {
 // Обработка результата
         }
+    }
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_order_list, menu);
+        MenuItem subtitleItem = menu.findItem(R.id.menu_item_show_subtitle);
+        if (mSubtitleVisible) {
+            subtitleItem.setTitle(R.string.hide_subtitle);
+        } else {
+            subtitleItem.setTitle(R.string.show_subtitle);
+        }
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item_new_order:
+                Order order = new Order();
+                OrderLab.get(getActivity()).addOrder(order);
+                Intent intent = OrderPagerActivity
+                        .newIntent(getActivity(), order.getUuid());
+                startActivity(intent);
+                return true;
+            case R.id.menu_item_show_subtitle:
+                mSubtitleVisible = !mSubtitleVisible;
+                getActivity().invalidateOptionsMenu();
+                updateSubtitle();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void updateSubtitle() {
+        OrderLab orderLab= OrderLab.get(getActivity());
+        int orderCount = orderLab.getOrders().size();
+        String subtitle = getResources()
+                .getQuantityString(R.plurals.subtitle_plural,orderCount, orderCount);
+        if (!mSubtitleVisible) {
+            subtitle = null;
+        }
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        activity.getSupportActionBar().setSubtitle(subtitle);
     }
 }

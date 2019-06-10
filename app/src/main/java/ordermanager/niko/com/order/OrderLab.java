@@ -91,10 +91,11 @@ public void testAddOrders(){
         mDatabase.insert(OrderTable.NAME, null, values);
     }
 
-    public void updateCrime(Order order) {
+    public int updateOrder(Order order) {
+
         String uuidString = order.getUuid().toString();
         ContentValues values = getContentValues(order);
-        mDatabase.update(OrderTable.NAME, values,
+     return   mDatabase.update(OrderTable.NAME, values,
                 OrderTable.Cols.UUID + " = ?",
                 new String[]{uuidString});
     }
