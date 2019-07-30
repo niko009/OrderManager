@@ -176,7 +176,7 @@ public class OrderFragment extends Fragment {
 
     private void updatePhotoView() {
         if (mPhotoFile == null || !mPhotoFile.exists()) {
-            mViewHolder.setImage(null);
+            mViewHolder.setEmptyImage();
         } else {
 
             Bitmap bitmap = PictureUtils.getScaledBitmap(
@@ -344,7 +344,9 @@ mViewHolder.updateAdapter();
         public void setImage(Bitmap bitmap) {
             mPhotoView.setImageBitmap(bitmap);
         }
-
+        public void setEmptyImage() {
+            mPhotoView.setImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
+        }
         public void setButtonVariable(boolean enabled, View.OnClickListener listener) {
             mTakePhotoButton.setEnabled(enabled);
             mTakePhotoButton.setOnClickListener(listener);

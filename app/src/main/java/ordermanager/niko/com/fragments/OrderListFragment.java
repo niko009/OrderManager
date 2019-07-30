@@ -4,10 +4,14 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -20,6 +24,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,12 +38,10 @@ import ordermanager.niko.com.order.OrderLab;
 
 public class OrderListFragment extends Fragment {
     private static final int REQUEST_ORDER = 1;
-    private static final String SAVED_SUBTITLE_VISIBLE = "subtitle";
 
     private final int CAMERA_PERMISSION_ID = 1;
     private RecyclerView mOrderRecyclerView;
     private OrderAdapter mAdapter;
-    private boolean mSubtitleVisible;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,6 +78,7 @@ public class OrderListFragment extends Fragment {
         }
 
     }
+
     private boolean checkPermission(String permission) {
         int result = ContextCompat.checkSelfPermission(getActivity(), permission);
         if (result == PackageManager.PERMISSION_GRANTED) {
@@ -101,17 +105,27 @@ public class OrderListFragment extends Fragment {
                 .findViewById(R.id.order_recycler_view);
         mOrderRecyclerView.setLayoutManager(new LinearLayoutManager
                 (getActivity()));
-        if (savedInstanceState != null) {
-            mSubtitleVisible = savedInstanceState.getBoolean
-                    (SAVED_SUBTITLE_VISIBLE);
-        }
+        FloatingActionButton fb= (FloatingActionButton)view.findViewById(R.id.fabAddNewOrder);
+
+        fb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                addNewOrderClick();
+
+            }
+        });
+
+
+
         updateUI();
         return view;
     }
+
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(SAVED_SUBTITLE_VISIBLE, mSubtitleVisible);
     }
     @Override
     public void onResume() {
@@ -144,6 +158,20 @@ public class OrderListFragment extends Fragment {
         public OrderHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
             View view = layoutInflater.inflate(R.layout.list_item_order, parent, false);
+            GradientDrawable gd = new GradientDrawable();
+            gd.setColors(new int[]{
+                    Color.RED,
+                    Color.GREEN
+
+            });
+            gd.setOrientation(GradientDrawable.Orientation.LEFT_RIGHT);
+            gd.setGradientType(GradientDrawable.RADIAL_GRADIENT) ;
+gd.setShape(GradientDrawable.RECTANGLE);
+            gd.setGradientRadius(640.0f);
+            gd.mutate();
+            gd.setGradientCenter(.9f,.5f);
+           // view.setBackgroundDrawable(gd);
+
             return new OrderHolder(view);
         }
 
@@ -206,41 +234,35 @@ public class OrderListFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_order_list, menu);
-        MenuItem subtitleItem = menu.findItem(R.id.menu_item_show_subtitle);
-        if (mSubtitleVisible) {
-            subtitleItem.setTitle(R.string.hide_subtitle);
-        } else {
-            subtitleItem.setTitle(R.string.show_subtitle);
-        }
+
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_new_order:
-                Order order = new Order();
-                OrderLab.get(getActivity()).addOrder(order);
-                Intent intent = OrderPagerActivity
-                        .newIntent(getActivity(), order.getUuid());
-                startActivity(intent);
+                addNewOrderClick();
                 return true;
-            case R.id.menu_item_show_subtitle:
-                mSubtitleVisible = !mSubtitleVisible;
-                getActivity().invalidateOptionsMenu();
-                updateSubtitle();
+            case R.id.menu_item_find_order:
+
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
+    private void addNewOrderClick(){
+        Order order = new Order();
+        OrderLab.get(getActivity()).addOrder(order);
+        Intent intent = OrderPagerActivity
+                .newIntent(getActivity(), order.getUuid());
+        startActivity(intent);
+    }
     private void updateSubtitle() {
         OrderLab orderLab= OrderLab.get(getActivity());
         int orderCount = orderLab.getOrders().size();
         String subtitle = getResources()
                 .getQuantityString(R.plurals.subtitle_plural,orderCount, orderCount);
-        if (!mSubtitleVisible) {
-            subtitle = null;
-        }
+
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         activity.getSupportActionBar().setSubtitle(subtitle);
     }

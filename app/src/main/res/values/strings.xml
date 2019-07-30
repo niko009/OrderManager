@@ -20,4 +20,5 @@
         <item quantity="one">%1$s order</item>
         <item quantity="other">%1$s orders</item>
     </plurals>
+    <string name="str_order_done">End Order</string>
 </resources>
